@@ -1,2 +1,6 @@
 *.pyc 
 *.bin
+finished_files
+finished_files/*
+.idea
+.DS_STORE

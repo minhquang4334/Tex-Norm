@@ -19,6 +19,7 @@ from train_util import get_input_from_batch, get_output_from_batch
 
 use_cuda = config.use_gpu and torch.cuda.is_available()
 
+
 class Train(object):
     def __init__(self):
         self.vocab = Vocab(config.vocab_path, config.vocab_size)
@@ -59,7 +60,7 @@ class Train(object):
         start_iter, start_loss = 0, 0
 
         if model_file_path is not None:
-            state = torch.load(model_file_path, map_location= lambda storage, location: storage)
+            state = torch.load(model_file_path, map_location=lambda storage, location: storage)
             start_iter = state['iter']
             start_loss = state['current_loss']
 
@@ -87,10 +88,13 @@ class Train(object):
         step_losses = []
         for di in range(min(max_dec_len, config.max_dec_steps)):
             y_t_1 = dec_batch[:, di]  # Teacher forcing
-            final_dist, s_t_1,  c_t_1, attn_dist, p_gen, next_coverage = self.model.decoder(y_t_1, s_t_1,
-                                                        encoder_outputs, encoder_feature, enc_padding_mask, c_t_1,
-                                                        extra_zeros, enc_batch_extend_vocab,
-                                                                           coverage, di)
+            final_dist, s_t_1, c_t_1, attn_dist, p_gen, next_coverage = self.model.decoder(y_t_1, s_t_1,
+                                                                                           encoder_outputs,
+                                                                                           encoder_feature,
+                                                                                           enc_padding_mask, c_t_1,
+                                                                                           extra_zeros,
+                                                                                           enc_batch_extend_vocab,
+                                                                                           coverage, di)
             target = target_batch[:, di]
             gold_probs = torch.gather(final_dist, 1, target.unsqueeze(1)).squeeze()
             step_loss = -torch.log(gold_probs + config.eps)
@@ -98,13 +102,13 @@ class Train(object):
                 step_coverage_loss = torch.sum(torch.min(attn_dist, coverage), 1)
                 step_loss = step_loss + config.cov_loss_wt * step_coverage_loss
                 coverage = next_coverage
-                
+
             step_mask = dec_padding_mask[:, di]
             step_loss = step_loss * step_mask
             step_losses.append(step_loss)
 
         sum_losses = torch.sum(torch.stack(step_losses, 1), 1)
-        batch_avg_loss = sum_losses/dec_lens_var
+        batch_avg_loss = sum_losses / dec_lens_var
         loss = torch.mean(batch_avg_loss)
 
         loss.backward()
@@ -137,14 +141,15 @@ class Train(object):
             if iter % 5000 == 0:
                 self.save_model(running_avg_loss, iter)
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Train script")
     parser.add_argument("-m",
-                        dest="model_file_path", 
+                        dest="model_file_path",
                         required=False,
                         default=None,
                         help="Model file for retraining (default: None).")
     args = parser.parse_args()
-    
+
     train_processor = Train()
     train_processor.trainIters(config.max_iterations, args.model_file_path)

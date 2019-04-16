@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "training_ptr_gen/train.py", line 149, in <module>
+    train_processor = Train()
+  File "training_ptr_gen/train.py", line 24, in __init__
+    self.vocab = Vocab(config.vocab_path, config.vocab_size)
+  File "/Users/hoangquang/Documents/programing/ML/pointer_summarizer/data_util/data.py", line 35, in __init__
+    with open(vocab_file, 'r') as vocab_f:
+IOError: [Errno 2] No such file or directory: '/Documents/programing/ML/pointer_summarizer/finished_files/vocab'
